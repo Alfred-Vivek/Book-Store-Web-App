@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Book Store</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">  
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" id="bootstrap-css">
+</head>
+<body>
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/">Book Store</a>
+    </div>
+    {% if not session.logged_in %}
+    <ul class="nav navbar-nav navbar-right">
+      <li><a href="/signup"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
+      <li><a href="/login"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+    </ul>
+    {% else %}
+    <ul class="nav navbar-nav navbar-right">
+        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" style="color: #F2F3F4;" href="#">Hi! {{session.logged_email}}<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li class="dropdown-list"><a href="/myorders">My orders</a></li>
+              <li class="dropdown-list"><a href="/logout">Logout</a></li>
+            </ul>
+          </li>
+    </ul>
+    {% endif %}
+  </div>
+</nav>
+
+<div class="container">
+<br>
+          {% set total = [0] %}
+          {%for i in cart%}
+          <div class="row well col-md-12">
+          <div class="col-md-1"></div>
+          <div class="col-md-2"><img src="{{i.image}}" class="img-responsive" width="70px"/></div>
+          <div class="col-md-4">
+          <p>Title : {{i.title}}</p>              
+          <p>Price : {{i.price}}</p>
+          <p>Quantity: {{i.quantity}}</p>
+          </div>
+          <div class="col-md-2"><p>Order Summary</p><p>{{i.price}} X {{i.quantity}}</p><p>={{(i.price * i.quantity)|round(1)}}</p></div>
+          <form method="post" action="{{url_for('deleteitem')}}">
+          <input type="text" style="display: none;" name="email" value="{{i.email}}"></input>
+          <input type="text" style="display: none;" name="title" value="{{i.title}}"></input>
+          <div class="col-md-2"><p></p><p><button type="submit" class="btn btn-primary"><i class="fa fa-remove"></i></button></p></div>
+          </form>
+          </div><br>
+			  {% set _ = total.append(total.pop() + (i.price * i.quantity)) %}
+          {% endfor %}          
+          <div class="row well col-md-12">
+          <div class="col-md-6">
+          <form class="form-horizontal" method="post" action="{{url_for('summary')}}">
+          <fieldset>         
+                <h2>Address</h2>         
+                <!-- full-name input-->
+                <div class="control-group">
+                    <label class="control-label">Full Name</label>
+                    <div class="controls">
+                        <input id="full-name" name="fullname" type="text" placeholder="full name" class="input-xlarge" required>
+                        <p class="help-block"></p>
+                    </div>
+                </div>
+                <!-- address-line1 input-->
+                <div class="control-group">
+                    <label class="control-label">Address</label>
+                    <div class="controls">
+                        <input id="address" name="address" type="text" placeholder="address" class="input-xlarge" required>
+                    </div>
+                </div>
+                <!-- city input-->
+                <div class="control-group">
+                    <label class="control-label">City / Town</label>
+                    <div class="controls">
+                        <input id="city" name="city" type="text" placeholder="city" class="input-xlarge" required>
+                        <p class="help-block"></p>
+                    </div>
+                </div>
+                <!-- postal-code input-->
+                <div class="control-group">
+                    <label class="control-label">Zip / Postal Code</label>
+                    <div class="controls">
+                        <input id="postal-code" name="pin" type="text" placeholder="zip or postal code" class="input-xlarge" required>
+                        <p class="help-block"></p>
+                    </div>
+                </div>
+                <!-- country select -->
+                <div class="control-group">
+                    <label class="control-label">Country</label>
+                    <div class="controls">
+                        <select id="country" name="country" class="input-xlarge" required>
+                            <option value="" selected="selected">(please select a country)</option>
+                            <option value="IN">India</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>            
+            </div>                  
+      <div class="col-md-6">
+          <div class="col-md-12">
+          <br><br><h3>Order Summary :</h3>
+          <h4>Order Total : INR {{total[0]|round(1)}}</h4>
+          <h4>Total Discount : 10% (-{{total[0]|round(1)*0.1|round(1)}})</h4>
+          <h4>Amount Payable : {{total[0]|round(1)-(total[0]|round(1)*0.1|round(1))}}</h4>
+          <button type="submit" class="btn btn-info btn-lg">Proceed to Checkout</button>
+          </div>                    
+          </div>
+      </div>      
+     </div></form>
+     </div>
+</body>
+</html>

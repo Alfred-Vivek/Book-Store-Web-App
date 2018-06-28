@@ -1,0 +1,93 @@
+{%extends "layout.html"%}
+{%block body%}
+{%if error!=""%}<script>alert("{{error}}")</script>{%endif%}
+<div class="row">
+<br><br><h1 style="font-family: cursive;font-size: 44px;font-style: normal;font-variant: normal;font-weight: 500;line-height: 26.4px;">The independent bookshop with traditional values</h1><br><br>
+{%for i in range(size) %}
+		<div class="col-md-5">
+		<div class="row well">
+			<div class="col-md-3">
+					<img src='{{ data["items"][i]["volumeInfo"]["imageLinks"]["thumbnail"]}}' width="70px" data-toggle="modal" data-target="#myModal'+count+'"></div>
+					<div class="col-md-9">
+								<p>{{ data['items'][i]["volumeInfo"]["authors"][0]}}</p>
+								<p>Price: {% if (data['items'][i]['saleInfo']['saleability'])=="NOT_FOR_SALE" %}{{data['items'][i]['saleInfo']['saleability']}}{% else %}{{data['items'][i]['saleInfo']['listPrice']['amount']}}{{data['items'][i]['saleInfo']['listPrice']['currencyCode']}}{%endif%}</p>
+								<p>Publisher: {{ data['items'][i]["volumeInfo"]["publisher"]}}</p>
+								<p>Publishing date: {{ data['items'][i]["volumeInfo"]["publishedDate"]}}</p>
+								<button type="button" class="btn btn-info btn-md" style="margin-left: 80%;" data-toggle="modal" data-target="#myModal{{i}}">Buy</button>			
+					</div>
+			</div>
+		</div>
+		<div class="col-md-1"></div>
+		<!--// Code for the modal. -->			
+		<div class="modal fade" id="myModal{{i}}" role="dialog">
+	    		<div class="modal-dialog modal-lg">
+					<div class="modal-content">
+			        <div class="modal-header">
+			          <button type="button" class="close" data-dismiss="modal">&times;</button>
+			          <h4 class="modal-title text-center">{{ data['items'][i]["volumeInfo"]["title"] }}</h4>
+			        </div>
+			        <div class="modal-body">
+						<div class="row">
+							<div class="col-sm-2">	
+							<img src='{{ data["items"][i]["volumeInfo"]["imageLinks"]["thumbnail"]}}'></div>
+							<div class="col-sm-5">
+										<p>{{data['items'][i]["volumeInfo"]["authors"][0]}}</p>
+										<p>Price: {% if (data['items'][i]['saleInfo']['saleability'])=="NOT_FOR_SALE" %}{{data['items'][i]['saleInfo']['saleability']}}{% else %}{{data['items'][i]['saleInfo']['listPrice']['amount']}}{{data['items'][i]['saleInfo']['listPrice']['currencyCode']}}{%endif%}</p>
+										<p>Publisher: {{ data['items'][i]["volumeInfo"]["publisher"]}}</p>
+										<p>Publishing date: {{ data['items'][i]["volumeInfo"]["publishedDate"]}}</p>
+								</div>
+							<div class="col-sm-3">							
+							<form method="post" action="{{url_for('cart')}}">
+							<label>Quantity:</label><input type="number" class="form-control" name="quantity" min="1" max="3" value="0">
+							<input type="text" style="display: none;" name="title" value="{{ data['items'][i]['volumeInfo']['title'] }}"></input>
+							<input type="text" style="display: none;" name="image" value="{{ data['items'][i]['volumeInfo']['imageLinks']['thumbnail']}}"></input>
+							<input type="text" style="display: none;" name="price" value="{% if (data['items'][i]['saleInfo']['saleability'])=='NOT_FOR_SALE'%}{{0}}{% else %}{{data['items'][i]['saleInfo']['listPrice']['amount']}}{%endif%}"></input>
+							<br><center><button type="submit" class="btn btn-warning btn-md">Add To Cart</button></center></form></div>
+							</div>
+							<div class="row">								
+							<div class="col-sm-12">
+							<br><p>Description: {{data['items'][i]["volumeInfo"]["description"]}}</p>
+							<center><p>Click &nbsp<a href='{{data['items'][i]["volumeInfo"]["previewLink"]}}' target="_blank">Here</a>&nbsp for Book Preview</p></center>
+						</div></div></div></div></div></div>
+{% endfor %}
+</div>
+      <div class="modal fade" id="myModal" role="dialog">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title text-center">Your Cart</h4>
+              </div>
+              <div class="modal-body">
+              {% set total = [0] %}
+              {%for i in cart%}
+              <div class="row">
+              <div class="col-md-1"></div>
+              <div class="col-md-2">
+              <img src="{{i.image}}" class="img-responsive" width="70px"/></div>
+              <div class="col-md-4">
+              <p>Title : {{i.title}}</p>              
+              <p>Price : {{i.price}}</p>
+              <p>Quantity:  <input type="number" class="form-control-static" name="quantity" min="1" max="3" value="{{i.quantity}}" style="width:60px;"></p>
+              </div>
+              <div class="col-md-2"><p>Order Summary</p><p>{{i.price}} X {{i.quantity}}</p><p>={{(i.price * i.quantity)|round(1)}}</p></div>
+              <form method="post" action="{{url_for('deleteitem')}}">
+              <input type="text" style="display: none;" name="email" value="{{i.email}}"></input>
+              <input type="text" style="display: none;" name="title" value="{{i.title}}"></input>
+              <div class="col-md-2"><p></p><p><button type="submit" class="btn btn-primary"><i class="fa fa-remove"></i></button></p></div>
+              </form>
+              </div><br>
+   			  {% set _ = total.append(total.pop() + (i.price * i.quantity)) %}
+              {% endfor %}
+              <div class="row well col-md-13">
+              <div class="col-md-2"></div>
+              <div class="col-md-5"><h4>Order Total : INR {{total[0]|round(1)}}</h4></div>
+              <div class="col-md-5">
+              <form method="post" action="{{url_for('checkout')}}">
+              <button type="submit" class="btn btn-info btn-md">Proceed to Checkout</button>
+              </form>
+              </div>
+              </div>
+              </div>
+            </div></div></div>
+{%endblock%}
